@@ -225,7 +225,9 @@ public class UserController {
                 if (hoTen.length() <= 50) {
                     existUser.setHoTen(hoTen);
                 } else {
-                    errorMessage.concat("Họ và Tên không hợp lệ");
+                    return ResponseEntity.status(HttpStatus.OK).body(
+                            new ResponseObject("error", "Họ và tên không hợp lệ.", "")
+                    );
                 }
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -242,20 +244,21 @@ public class UserController {
 
                 existUser.setSdt(sdt);
 
-                String avtName = imageStorageService.storeFile(avtURL);
-                Path[] paths = imageStorageService.loadFile(avtName).toArray(Path[]::new);
+                if(!avtURL.isEmpty()){
+                    String avtName = imageStorageService.storeFile(avtURL);
+                    Path[] paths = imageStorageService.loadFile(avtName).toArray(Path[]::new);
 //                Stream<Path> pathStream = imageStorageService.loadFile(avtName);
-                //Kiểm tra xem file có tồn tại không
-                if (paths.length > 0) {
-                    Path filePath = paths[0];
-                    String urlPath = MvcUriComponentsBuilder.fromMethodName(UserController.class,
-                            "readDetailFile", filePath.getFileName().toString()).build().toUri().toString();
+                    //Kiểm tra xem file có tồn tại không
+                    if (paths.length > 0) {
+                        Path filePath = paths[0];
+                        String urlPath = MvcUriComponentsBuilder.fromMethodName(UserController.class,
+                                "readDetailFile", filePath.getFileName().toString()).build().toUri().toString();
 //                    UrlResource resource = new UrlResource(filePath.toUri());
 //                    System.out.println("URL " + resource);
-                    System.out.println("urlAVT " + urlPath);
-                    existUser.setAvtURL(urlPath);
+                        System.out.println("urlAVT " + urlPath);
+                        existUser.setAvtURL(urlPath);
+                    }
                 }
-
                 // Gọi UserService để lưu người dùng
                 User updateUser = userService.saveUser(existUser);
 
